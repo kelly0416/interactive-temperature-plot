@@ -19,26 +19,45 @@
 
     <script>
         function updatePlot(year) {
-            document.getElementById("year-value").innerText = year;
-            let filePath = `temperature_plot_${year}.html`;
+    document.getElementById("year-value").innerText = year;
+    let filePath = `temperature_plot_${year}.html`;
 
-            console.log("Fetching file:", filePath);  // Debugging log
+    console.log("Fetching file:", filePath);  // Debugging output
 
-            fetch(filePath)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`File not found: ${filePath}`);
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    document.getElementById("plot-container").innerHTML = html;
-                })
-                .catch(error => {
-                    console.error("Error loading file:", error);
-                    document.getElementById("plot-container").innerHTML = `<p style="color:red;">Error: Plot not found for year ${year}. Check if the file exists.</p>`;
-                });
-        }
+    fetch(filePath)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`File not found: ${filePath}`);
+            }
+            return response.text();
+        })
+        .then(html => {
+            let container = document.getElementById("plot-container");
+
+            // Clear existing content
+            container.innerHTML = "";
+
+            // Create a temporary div and insert the new content
+            let tempDiv = document.createElement("div");
+            tempDiv.innerHTML = html;
+
+            // Append the new content to the container
+            container.appendChild(tempDiv);
+
+            // Execute any scripts inside the newly loaded HTML
+            tempDiv.querySelectorAll("script").forEach(script => {
+                let newScript = document.createElement("script");
+                newScript.textContent = script.textContent;
+                document.body.appendChild(newScript);
+            });
+
+            console.log("Updated plot for year:", year);
+        })
+        .catch(error => {
+            console.error("Error loading file:", error);
+            document.getElementById("plot-container").innerHTML = `<p style="color:red;">Error: Plot not found for year ${year}. Check if the file exists.</p>`;
+        });
+}
     </script>
 </body>
 </html>
